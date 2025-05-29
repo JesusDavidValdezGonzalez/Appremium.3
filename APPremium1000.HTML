@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Verizon Training App</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<style>
+  body { font-family: Arial, sans-serif; background: #f0f4f8; margin: 0; color: #000; }
+  .container { max-width: 600px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  h1 { text-align: center; color: #003366; }
+  input, textarea, button { width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+  button { background: #0074C1; color: #fff; cursor: pointer; transition: background 0.3s ease; }
+  button:hover { background: #005fa3; }
+  .hidden { display: none; }
+  .scenario-link { display: block; margin: 10px 0; padding: 10px; background: #0074C1; color: #fff; text-decoration: none; border-radius: 4px; text-align: center; transition: background 0.3s ease; }
+  .scenario-link:hover { background: #005fa3; }
+  .gold { background: #e6f7ff; padding: 5px; border-left: 4px solid #0074C1; margin-top: 5px; border-radius: 4px; }
+  label { font-weight: bold; color: #003366; }
+  textarea { resize: vertical; }
+</style>
+</head>
+<body>
+
+<div id="login" class="container animate__animated animate__fadeIn">
+  <h1>Employee Login</h1>
+  <input type="text" id="employeeId" placeholder="Enter your 8-digit Employee ID" />
+  <p id="loginError" style="color:red;"></p>
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="dashboard" class="container hidden animate__animated animate__fadeIn">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>Scenarios</h1>
+    <button onclick="logout()" style="width:auto; background: #dc3545;">Logout</button>
+  </div>
+  <a href="#" class="scenario-link" onclick="openScenario('Promised Credit Not Found')">Promised Credit Not Found</a>
+  <a href="#" class="scenario-link" onclick="openScenario('Promotion Missing from Bill')">Promotion Missing from Bill</a>
+  <a href="#" class="scenario-link" onclick="openScenario('Device Returned but Still Charged')">Device Returned but Still Charged</a>
+  <a href="#" class="scenario-link" onclick="openScenario('Repeated Unexpected High Bill')">Repeated Unexpected High Bill</a>
+  <a href="#" class="scenario-link" onclick="openScenario('Customer Told They Qualified for Promo — But They Don’t')">Customer Told They Qualified for Promo</a>
+</div>
+
+<div id="scenario" class="container hidden animate__animated animate__fadeIn">
+  <h1 id="scenarioTitle"></h1>
+  <p id="scenarioDesc"></p>
+  <div id="behaviors"></div>
+  <button onclick="submitResponses()">Submit Responses</button>
+  <button onclick="backToDashboard()" style="background: #6c757d;">Back</button>
+</div>
+
+<script>
+const scenarios = {
+  "Promised Credit Not Found": "The customer was promised a $50 credit by a previous agent, but there's no documentation.",
+  "Promotion Missing from Bill": "The customer called multiple times expecting a promotion on their bill, but they do not qualify.",
+  "Device Returned but Still Charged": "The customer returned their phone, but the system still shows a $1200 charge.",
+  "Repeated Unexpected High Bill": "This is the third time the customer is calling about an unexpectedly high bill.",
+  "Customer Told They Qualified for Promo — But They Don’t": "The customer was told they qualified for a promotion, but it doesn't apply."
+};
+
+const behaviorLabels = [
+  "Empathy", "Confidence", "Expectations", "5 Probing Questions",
+  "Personalized Solution", "Call Closure / Recap", "Temp Check",
+  "Next Steps", "Memorable Goodbye", "Resource Shared", "Free Reflection"
+];
+
+function login() {
+  const id = document.getElementById("employeeId").value;
+  if (id.length === 8) {
+    localStorage.setItem("employeeId", id);
+    showSection("dashboard");
+  } else {
+    document.getElementById("loginError").innerText = "Employee ID must be exactly 8 characters.";
+  }
+}
+
+function logout() {
+  localStorage.removeItem("employeeId");
+  showSection("login");
+}
+
+function openScenario(title) {
+  document.getElementById("scenarioTitle").innerText = title;
+  document.getElementById("scenarioDesc").innerText = scenarios[title];
+  const behaviorsDiv = document.getElementById("behaviors");
+  behaviorsDiv.innerHTML = "";
+  behaviorLabels.forEach(label => {
+    behaviorsDiv.innerHTML += \`
+      <label>\${label}</label>
+      <textarea rows="3"></textarea>
+      <div class="gold hidden">Gold Standard: Example for \${label}</div>
+    \`;
+  });
+  showSection("scenario");
+}
+
+function submitResponses() {
+  const textareas = document.querySelectorAll("#behaviors textarea");
+  let allFilled = true;
+  textareas.forEach(t => { if (!t.value.trim()) allFilled = false; });
+  if (allFilled) {
+    const golds = document.querySelectorAll(".gold");
+    golds.forEach(g => g.classList.remove("hidden"));
+    alert("Feedback displayed!");
+  } else {
+    alert("Please fill in all fields before submitting.");
+  }
+}
+
+function backToDashboard() {
+  showSection("dashboard");
+}
+
+function showSection(id) {
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("dashboard").classList.add("hidden");
+  document.getElementById("scenario").classList.add("hidden");
+  document.getElementById(id).classList.remove("hidden");
+}
+
+window.onload = () => {
+  if (localStorage.getItem("employeeId")?.length === 8) {
+    showSection("dashboard");
+  }
+};
+</script>
+
+</body>
+</html>
